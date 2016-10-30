@@ -49,6 +49,16 @@ public class HashStructure {
 
 	}
 	
+	public void remove(String key){
+		int hashFunc = hashFunction(key);
+		table[hashFunc].remove(key);
+	}
+	
+	public boolean contains(String key){
+		int hashFunc = hashFunction(key);
+		return table[hashFunc].exist(key);
+	}
+	
 	public LinkedList<Integer> get(String key){
 		
 		int hashFunc = hashFunction(key);

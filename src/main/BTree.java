@@ -19,45 +19,88 @@ public class BTree {
 			right = null;
 			left = null;
 		}
+		
+		public Node(String key, int value){
+			this.key = key;
+			values = new LinkedList<>();
+			values.add(value);
+			right = null;
+			left = null;
+		}
 	}
 	
 	public BTree(){
 		root = null;
 	}
 	
-	public void add(String key, int val){
-		if(root == null){
-			root = new Node(key);
-			root.values.add(val);
-			return;
-		}
-		Node aux = get(key);
-		if(aux != null){
-			aux.values.add(val);
-			return;
-		}
-		aux = new Node(key);
-		aux.values.add(val);
-		
-		findWhereToAdd(aux,root);
-	}
+	public void add(String key, int value) {
+        root = add(root, key, value);
+    }
+
+    private Node add(Node node, String key, int value) {
+
+        if (node == null) {
+            return new Node(key,value);
+        }
+        if(node.key.equals(key)) {
+        	node.values.add(value);
+        	return node;
+        }
+        if (key.length() < node.key.length()) {
+            node.left = add(node.left, key, value);
+        }
+
+        else {
+            node.right = add(node.right, key, value);
+        }
+        return node;
+    }
 	
-	private void findWhereToAdd(Node p, Node a){
-		if(p.key.length() >= a.key.length()){
-			if(a.left == null){
-				a.left = p;
-				return;
-			}
-			findWhereToAdd(p,a.left);
-		}else{
-			if(a.right == null){
-				a.right = p;
-				return;
-			}
-			findWhereToAdd(p,a.right);
-		}
-		
-	}
+    public void remove (String key){
+    	remove(root, key);
+    }
+    
+    private void remove (Node n, String key ){
+    	Node pai = encontraPai(n,key);
+    	if (pai == null) return;
+    	Node filho = pai.left;
+    	if (key.length() > pai.key.length()) filho = pai.right;
+    	int netos = 0;
+    	if(filho.left != null) netos++;
+    	if(filho.right != null) netos++;
+    	
+    	Node refNeto = null;
+    	switch(netos){
+    		case 1: refNeto = filho.right;
+    				if(filho.left != null) refNeto = filho.left;
+    		
+    		case 0: if (key.length() > pai.key.length()) pai.right = refNeto;
+    				else pai.left = refNeto;
+    			break;
+    			
+    		case 2: Node maxMin = filho.left;
+    				while(maxMin.right != null){
+    					maxMin = maxMin.right;
+    				}
+    				String aux = maxMin.key;
+    				remove(filho, maxMin.key);
+    				filho.key = aux;
+    			break;
+    	}
+    }
+    
+    private Node encontraPai(Node n, String key ){
+    	Node pai = null;
+    	Node atual = n;
+    	
+    	while(true){
+			if(atual == null) return null;
+			if(atual.key == key) return pai;
+			pai = atual;
+			if (key.length() < atual.key.length()) atual = atual.left;
+			else atual = atual.right;
+    	}
+    }
 	
 	public boolean exist(String key){
 		if(root.key.equals(key)) return true;
@@ -67,8 +110,8 @@ public class BTree {
 	private boolean exist(String key, Node p){
 		if(p == null) return false;
 		if(p.key.equals(key)) return true;
-		if(key.length() >= p.key.length()) exist(key,p.left);
-		if(key.length() < p.key.length()) exist(key,p.right);
+		if(key.length() < p.key.length()) exist(key,p.left);
+		if(key.length() >= p.key.length()) exist(key,p.right);
 		return false;
 	}
 
@@ -80,8 +123,8 @@ public class BTree {
 	private Node get(String key, Node p){
 		if(p == null) return null;
 		if(p.key.equals(key)) return p;
-		if(key.length() >= p.key.length()) return get(key,p.left);
-		if(key.length() < p.key.length()) return get(key,p.right);
+		if(key.length() < p.key.length()) return get(key,p.left);
+		if(key.length() >= p.key.length()) return get(key,p.right);
 		return null;
 	}
 	
