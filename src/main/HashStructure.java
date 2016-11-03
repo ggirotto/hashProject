@@ -1,26 +1,32 @@
 package main;
 
 import java.util.LinkedList;
+import java.util.Random;
 
 public class HashStructure {
 
 	private final BTree[] table;
 	private int size;
 	private int capacity;
-	private int colisions;
+	private int colisions[];
+	private double fracRandom;
 
 	public HashStructure(){
 		table = new BTree[20];
 		size = 0;
 		capacity = 20;
-		colisions = 0;
+		colisions = new int [capacity];
+		Random r = new Random();
+		fracRandom = r.nextDouble();
 	}
 	
 	public HashStructure(int cap){
 		table = new BTree[cap];
 		size = 0;
 		capacity = cap;
-		colisions = 0;
+		colisions = new int [capacity];
+		Random r = new Random();
+		fracRandom = r.nextDouble();
 	}
 
 	private int hashFunction(String key){
@@ -33,17 +39,39 @@ public class HashStructure {
 		return hashNumber%capacity;
 
 	}
-
+	
+	private int knuthHashFunction(String key){
+		
+		int k = hashFunction(key);
+		k += k*(k+3);
+		return k%capacity;
+		
+	}
+	
+	private int multiplicacaoHashFunction(String key){
+		
+		double frac = fracRandom;
+		
+		double x = hashFunction(key) * frac;
+		x = x-(Math.floor(x));
+				
+		return (int) Math.floor(capacity * x);
+		
+	}
+	
 	public void add(String key, int value){
-
-		int hashFunc = hashFunction(key);
-		if(table[hashFunc] == null){
+		
+//		if(key.contains(".")){
+//			key.replace(".", "");
+//		}
+		int hashFunction = multiplicacaoHashFunction(key);
+		if(table[hashFunction] == null){
 			BTree arvore = new BTree();
 			arvore.add(key,value);
-			table[hashFunc] = arvore;
+			table[hashFunction] = arvore;
 		}else{
-			colisions++;
-			BTree arvore = table[hashFunc];
+			colisions[hashFunction]++;
+			BTree arvore = table[hashFunction];
 			arvore.add(key,value);
 		}
 
@@ -67,7 +95,7 @@ public class HashStructure {
 		
 	}
 
-	public int getColisions(){ return colisions;}
+	public int [] getColisions(){ return colisions;}
 
 
 
